@@ -100,9 +100,9 @@ export default function Home() {
     <div className="min-h-screen flex flex-col items-center pt-12">
       <div className="w-full max-w-md p-6 space-y-8">
 		<div className="flex justify-between items-center mb-8">
-		<h1 className="text-2xl font-semibold bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">Options Wizard</h1>
+		<h1 className="text-4xl font-semibold bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">Options Wizard</h1>
 		<Button variant="outline" size="sm" onClick={() => {
-			setSelectedCurrency(undefined)
+			setSelectedCurrency('')
 			setTargetPrice(undefined)
 			setCurrentPrice(undefined)
 			setSelectedExpiry(undefined)
