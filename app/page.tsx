@@ -10,7 +10,7 @@ import formatUSD from '@/lib/format-usd'
 import formatDate from '@/lib/format-date'
 import { InstrumentPublicResponseSchema } from '@/types/public.get_instruments'
 import { Button } from '@/components/ui/button'
-import { Info } from 'lucide-react'
+import { Info, Target, Calendar, CircleDollarSign } from 'lucide-react'
 
 export default function Home() {
   const [currencies, setCurrencies] = useState<CurrencyResponseSchema[]>([])
@@ -97,49 +97,78 @@ export default function Home() {
   }, [selectedCurrency, targetPrice, selectedExpiry, currentPrice, availableInstruments])
 
   return (
-    <div className="min-h-screen flex flex-col items-center pt-12">
-      <div className="w-full max-w-md p-6 space-y-8">
-		<div className="flex justify-between items-center mb-8">
-		<h1 className="text-4xl font-semibold bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">Options Wizard</h1>
-		<Button variant="outline" size="sm" onClick={() => {
-			setSelectedCurrency('')
-			setTargetPrice(undefined)
-			setCurrentPrice(undefined)
-			setSelectedExpiry(undefined)
-			setRecommendedInstrument(undefined)
-			setBestBid(undefined)
-			setBestAsk(undefined)
-			}}>
-			Reset
-		</Button>
-		</div>
-        
-        <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-b from-background to-background/95">
+      <div className="max-w-2xl mx-auto px-6 py-12">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-12">
+          <div>
+            <h1 className="text-3xl font-semibold bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">
+              Options Wizard
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Find the perfect options trade based on your price target
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setSelectedCurrency(undefined)
+              setTargetPrice(undefined)
+              setCurrentPrice(undefined)
+              setSelectedExpiry(undefined)
+              setRecommendedInstrument(undefined)
+              setBestBid(undefined)
+              setBestAsk(undefined)
+            }}
+            className="hover:bg-secondary/80"
+          >
+            Reset
+          </Button>
+        </div>
+
+        {/* Main Form */}
+        <div className="space-y-8 bg-card rounded-xl p-6 shadow-lg border border-border/50">
+          {/* Currency Selection */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">Currency</label>
+            <label className="text-sm font-medium flex items-center gap-2">
+              <CircleDollarSign className="w-4 h-4 text-blue-500" /> 
+              Select Currency
+            </label>
             <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select currency" />
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choose a currency to trade" />
               </SelectTrigger>
               <SelectContent>
                 {currencies.map((currency) => (
-                  <SelectItem key={currency.currency} value={currency.currency}>
-                    {currency.currency} ({formatUSD(parseFloat(currency.spot_price))})
+                  <SelectItem 
+                    key={currency.currency} 
+                    value={currency.currency}
+                    className="flex items-center justify-between"
+                  >
+                    <span className="font-medium">{currency.currency}</span>
+                    <span className="text-muted-foreground ml-2">
+                      {formatUSD(parseFloat(currency.spot_price))}
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
+          {/* Target Price */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">Target Price</label>
+            <label className="text-sm font-medium flex items-center gap-2">
+              <Target className="w-4 h-4 text-violet-500" />
+              Target Price
+            </label>
             <Select 
               value={targetPrice} 
               onValueChange={setTargetPrice} 
               disabled={!currentPrice}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select target price" />
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select your price target" />
               </SelectTrigger>
               <SelectContent>
                 {[0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5].map((multiplier) => {
@@ -148,22 +177,33 @@ export default function Home() {
                     : "0"
                   return (
                     <SelectItem key={multiplier} value={price}>
-                      {currentPrice ? formatUSD(parseFloat(price)) : '--'}
+                      <div className="flex items-center justify-between w-full">
+                        <span>{formatUSD(parseFloat(price))}</span>
+						<span className="text-xs text-muted-foreground ml-2">
+						{multiplier > 1 ? '+' : ''}
+						{((multiplier - 1) * 100).toFixed(0)}%
+						</span>
+                      </div>
                     </SelectItem>
-                  )})}
+                  )
+                })}
               </SelectContent>
             </Select>
           </div>
 
+          {/* Expiry Selection */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">Expiry</label>
+            <label className="text-sm font-medium flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-blue-500" />
+              Expiry Date
+            </label>
             <Select 
               value={selectedExpiry?.toString()} 
               onValueChange={(value) => setSelectedExpiry(Number(value))}
               disabled={!selectedCurrency}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select expiry" />
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choose expiration date" />
               </SelectTrigger>
               <SelectContent>
                 {expiries.map((expiry) => (
@@ -176,40 +216,48 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Results Card */}
         {recommendedInstrument && (
-          <div className="mt-12 pt-8 border-t border-border bg-blue-500/5 rounded-lg p-6">
-            <div className="space-y-6">
-              <div className="text-center">
-                <h2 className="text-sm font-medium text-muted-foreground mb-2">Recommended Trade</h2>
-                <p className="text-2xl font-medium">
-                  Buy {selectedCurrency} {formatUSD(parseFloat(recommendedInstrument.split('-')[2]))} {' '}
-                  {formatDate(Number(recommendedInstrument.split('-')[1]) / 100)} {' '}
+          <div className="mt-8 rounded-xl overflow-hidden border border-border/50 bg-card animate-in fade-in slide-in-from-bottom-4">
+            <div className="bg-blue-500/5 p-6">
+              <h2 className="text-lg font-medium text-center mb-4">Recommended Trade</h2>
+              <div className="text-center space-y-1">
+                <div className="text-2xl font-semibold">
+                  {selectedCurrency} {formatUSD(parseFloat(recommendedInstrument.split('-')[2]))} {' '}
                   {recommendedInstrument.endsWith('P') ? 'Put' : 'Call'}
-                </p>
+                </div>
+                <div className="text-muted-foreground">
+                  Expires {formatDate(Number(recommendedInstrument.split('-')[1]) / 100)}
+                </div>
               </div>
-
-			  <div className="grid grid-cols-2 gap-4 px-4">
-			    <div className="text-center p-4 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors group relative">
-				  <div className="text-sm font-medium text-muted-foreground mb-1 flex items-center justify-center gap-1">
-				    Best Bid
-				    <Info className="w-3 h-3 text-muted-foreground cursor-help" />
-				    <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-48 p-2 bg-popover text-popover-foreground text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
-					  Current best selling price
-				    </div>
-				  </div>
-				  <div className="text-lg text-blue-500">{bestBid ? formatUSD(parseFloat(bestBid)) : '--'}</div>
-			    </div>
-			  <div className="text-center p-4 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors group relative">
-				<div className="text-sm font-medium text-muted-foreground mb-1 flex items-center justify-center gap-1">
-				Best Ask
-				<Info className="w-3 h-3 text-muted-foreground cursor-help" />
-				<div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-48 p-2 bg-popover text-popover-foreground text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
-					Current best buying price
-				</div>
-				</div>
-				<div className="text-lg text-violet-500">{bestAsk ? formatUSD(parseFloat(bestAsk)) : '--'}</div>
-			</div>
-			</div>
+            </div>
+            
+            <div className="grid grid-cols-2 divide-x divide-border border-t border-border">
+              <div className="p-6 text-center group relative">
+                <div className="text-sm font-medium text-muted-foreground mb-2 flex items-center justify-center gap-1">
+                  Best Bid
+                  <Info className="w-3 h-3 cursor-help" />
+                  <div className="absolute invisible group-hover:visible bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-48 p-2 bg-popover text-popover-foreground text-xs rounded-lg shadow-lg">
+                    Current best selling price
+                  </div>
+                </div>
+                <div className="text-xl font-medium text-blue-500">
+                  {bestBid ? formatUSD(parseFloat(bestBid)) : '--'}
+                </div>
+              </div>
+              
+              <div className="p-6 text-center group relative">
+                <div className="text-sm font-medium text-muted-foreground mb-2 flex items-center justify-center gap-1">
+                  Best Ask
+                  <Info className="w-3 h-3 cursor-help" />
+                  <div className="absolute invisible group-hover:visible bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-48 p-2 bg-popover text-popover-foreground text-xs rounded-lg shadow-lg">
+                    Current best buying price
+                  </div>
+                </div>
+                <div className="text-xl font-medium text-violet-500">
+                  {bestAsk ? formatUSD(parseFloat(bestAsk)) : '--'}
+                </div>
+              </div>
             </div>
           </div>
         )}
