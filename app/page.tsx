@@ -161,8 +161,6 @@ export default function Home() {
 
 	findRecommendedTrade()
   }, [selectedCurrency, targetPrice, selectedExpiry, currentPrice, availableInstruments, strategyType])
-console.log('longLegAsk', recommendedSpread?.longLegAsk);
- console.log('shortLegBid', recommendedSpread?.shortLegBid);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95">
